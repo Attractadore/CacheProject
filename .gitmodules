@@ -1,0 +1,6 @@
+[submodule "cmake/CMakeTemplates"]
+    path = cmake/CMakeTemplates
+    url = https://github.com/Attractadore/CMakeTemplates.git
+[submodule "modules/DataStructures"]
+    path = modules/DataStructures
+	  url = https://github.com/Attractadore/DataStructures.git
