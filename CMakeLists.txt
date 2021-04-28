@@ -5,3 +5,5 @@ project(CacheProject)
 include(cmake/CMakeTemplates/CFlags.cmake)
 
 add_subdirectory(modules)
+
+add_subdirectory(src/demo)
