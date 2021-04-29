@@ -29,7 +29,7 @@ bool dummyCacheContains(DummyCache const* const cache, void const* const key) {
         return false;
     }
 
-    return memcmp(key, cache->data, cache->key_size);
+    return !memcmp(key, cache->data, cache->key_size);
 }
 
 void* dummyCacheAdd(DummyCache* const cache, void const* const key, void* const replace) {
