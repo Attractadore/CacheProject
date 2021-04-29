@@ -5,6 +5,8 @@
 #define VECTOR_TYPE_NAME ConstCharPtr
 #include <DataStructures/Vector.h>
 
+#include "CachePolicy.h"
+
 #include <curl/curl.h>
 
 #include <assert.h>
@@ -41,27 +43,60 @@ size_t writeToVector(char* const ptr, const size_t size, const size_t nmemb, voi
     return nmemb;
 }
 
-bool downloadAll(char const* const* const urls, const size_t num) {
-    assert(urls);
-
-    CURL* const handle = curl_easy_init();
-
-    curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, true);
+bool visitAll(char const* const* const urls, const size_t num, const size_t cache_capacity, char const* const cache_algorithm) {
+    assert(urls && cache_capacity && cache_algorithm);
 
     VectorChar* const vector = vectorCharAlloc();
+    CachePolicy* const cache_policy = cachePolicyAlloc(cache_capacity, sizeof(char const*), cache_algorithm);
+    if (!cache_policy) {
+        goto free_vector;
+    }
+    CURL* const handle = curl_easy_init();
+    if (!handle) {
+        goto free_cache;
+    }
 
-    curl_easy_setopt(handle, CURLOPT_WRITEDATA, vector);
-    curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, writeToVector);
+    if (curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, true) ||
+        curl_easy_setopt(handle, CURLOPT_WRITEDATA, vector) ||
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, writeToVector)) {
+        goto free_handle;
+    }
 
     for (size_t i = 0; i < num; i++) {
-        curl_easy_setopt(handle, CURLOPT_URL, urls[i]);
-        curl_easy_perform(handle);
-        writeBuffer(urls[i], vectorCharConstData(vector), vectorCharGetSize(vector));
+        printf("Visit %s...\n", urls[i]);
+        if (cachePolicyContains(cache_policy, &urls[i])) {
+            printf("%s has already been visited\n", urls[i]);
+            continue;
+        }
+
+        if (curl_easy_setopt(handle, CURLOPT_URL, urls[i]) ||
+            curl_easy_perform(handle) ||
+            writeBuffer(urls[i], vectorCharConstData(vector), vectorCharGetSize(vector)) != vectorCharGetSize(vector)) {
+            goto free_handle;
+        }
+
+        printf("Add %s to cache\n", urls[i]);
+        char const* replace = NULL;
+        if (cachePolicyAdd(cache_policy, &urls[i], &replace)) {
+            printf("Remove %s from cache\n", replace);
+            remove(replace);
+        }
+
         vectorCharClear(vector);
     }
 
     curl_easy_cleanup(handle);
+    cachePolicyFree(cache_policy);
+    vectorCharFree(vector);
 
+    return true;
+
+free_handle:
+    curl_easy_cleanup(handle);
+free_cache:
+    cachePolicyFree(cache_policy);
+free_vector:
+    vectorCharFree(vector);
     return false;
 }
 
@@ -127,7 +162,7 @@ void printStrings(FILE* const file, char const* const* const strs, const size_t 
     }
 }
 
-int main() {
+int main(int argc, char const* const* const argv) {
     char* const str = readString(stdin);
     if (!str) {
         return -1;
@@ -140,8 +175,9 @@ int main() {
         return -1;
     }
 
-    printStrings(stdout, urls, num_urls);
-    downloadAll(urls, num_urls);
+    const size_t cache_capacity = 128;
+    char const* const cache_algorithm = (argc > 1) ? (argv[1]) : ("");
+    visitAll(urls, num_urls, cache_capacity, cache_algorithm);
 
     free(urls);
     free(str);
