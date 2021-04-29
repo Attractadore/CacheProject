@@ -9,4 +9,4 @@ add_subdirectory(modules)
 add_subdirectory(src/demo)
 
 add_library(DummyCache "src/DummyCache.c")
-target_include_directories(DummyCache PRIVATE "include")
+target_include_directories(DummyCache PUBLIC "include")
