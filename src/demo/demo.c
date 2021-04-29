@@ -4,8 +4,9 @@
 #define VECTOR_TYPE char const*
 #define VECTOR_TYPE_NAME ConstCharPtr
 #include <DataStructures/Vector.h>
-
-#include "CachePolicy.h"
+#define CACHE_POLICY_TYPE char const*
+#define CACHE_POLICY_TYPE_NAME ConstCharPtr
+#include <DataStructures/CachePolicy.h>
 
 #include <curl/curl.h>
 
@@ -47,7 +48,7 @@ bool visitAll(char const* const* const urls, const size_t num, const size_t cach
     assert(urls && cache_capacity && cache_algorithm);
 
     VectorChar* const vector = vectorCharAlloc();
-    CachePolicy* const cache_policy = cachePolicyAlloc(cache_capacity, sizeof(char const*), cache_algorithm);
+    CachePolicyConstCharPtr* const cache_policy = cachePolicyConstCharPtrAlloc(cache_capacity, cache_algorithm);
     if (!cache_policy) {
         goto free_vector;
     }
@@ -64,8 +65,8 @@ bool visitAll(char const* const* const urls, const size_t num, const size_t cach
 
     for (size_t i = 0; i < num; i++) {
         printf("Visit %s...\n", urls[i]);
-        if (cachePolicyContains(cache_policy, &urls[i])) {
-            printf("%s has already been visited\n", urls[i]);
+        if (cachePolicyConstCharPtrContains(cache_policy, urls[i])) {
+            printf("Retrieve %s from cache\n", urls[i]);
             continue;
         }
 
@@ -77,16 +78,23 @@ bool visitAll(char const* const* const urls, const size_t num, const size_t cach
 
         printf("Add %s to cache\n", urls[i]);
         char const* replace = NULL;
-        if (cachePolicyAdd(cache_policy, &urls[i], &replace)) {
-            printf("Remove %s from cache\n", replace);
-            remove(replace);
+        switch (cachePolicyConstCharPtrAdd(cache_policy, urls[i], &replace)) {
+            case CACHE_POLICY_ADD_ERROR:
+                goto free_handle;
+            case CACHE_POLICY_ADD_REPLACE:
+                printf("Remove %s from cache\n", replace);
+                remove(replace);
+            case CACHE_POLICY_ADD_NO_REPLACE:
+                break;
+            default:
+                assert(!"Invalid enumration value");
         }
 
         vectorCharClear(vector);
     }
 
     curl_easy_cleanup(handle);
-    cachePolicyFree(cache_policy);
+    cachePolicyConstCharPtrFree(cache_policy);
     vectorCharFree(vector);
 
     return true;
@@ -94,7 +102,7 @@ bool visitAll(char const* const* const urls, const size_t num, const size_t cach
 free_handle:
     curl_easy_cleanup(handle);
 free_cache:
-    cachePolicyFree(cache_policy);
+    cachePolicyConstCharPtrFree(cache_policy);
 free_vector:
     vectorCharFree(vector);
     return false;
@@ -121,7 +129,10 @@ char* readString(FILE* const file) {
         return NULL;
     }
 
-    return vectorCharDisown(buffer, NULL, NULL);
+    char* const buffer_data = vectorCharDisown(buffer, NULL, NULL);
+    vectorCharFree(buffer);
+
+    return buffer_data;
 }
 
 char const** getUrls(char* str, size_t* const num_ptr) {
@@ -151,7 +162,10 @@ char const** getUrls(char* str, size_t* const num_ptr) {
         }
     }
 
-    return vectorConstCharPtrDisown(urls, num_ptr, NULL);
+    char const** const urls_data = vectorConstCharPtrDisown(urls, num_ptr, NULL);
+    vectorConstCharPtrFree(urls);
+
+    return urls_data;
 }
 
 void printStrings(FILE* const file, char const* const* const strs, const size_t num) {
