@@ -8,5 +8,5 @@ add_subdirectory(modules)
 
 add_subdirectory(src/demo)
 
-add_library(DummyCache "src/DummyCache.c")
-target_include_directories(DummyCache PUBLIC "include")
+add_library(CacheLib "src/DummyCache.c" "src/CachePolicy.c")
+target_include_directories(CacheLib PUBLIC "include")
