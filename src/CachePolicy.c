@@ -20,7 +20,7 @@ CachePolicy* cachePolicyAlloc(const size_t capacity, const size_t key_size, char
     assert(capacity && algorithm);
 
     CachePolicy* const cache_policy = calloc(1, sizeof(*cache_policy));
-    if (cache_policy) {
+    if (!cache_policy) {
         return NULL;
     }
 
