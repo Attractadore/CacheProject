@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-uintptr_t* readArr(FILE* const file, size_t* const size_ptr) {
+static uintptr_t* readArr(FILE* const file, size_t* const size_ptr) {
     assert(file && size_ptr);
 
     size_t num = 0;
@@ -33,7 +33,7 @@ uintptr_t* readArr(FILE* const file, size_t* const size_ptr) {
 int main(int argc, char const* const* argv) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s [CachingAlgorithm] [CacheCapacity]\n"
-                        "Available algorithms are: OPT, DUMMY\n",
+                        "Available algorithms are: OPT, Dummy\n",
                 argv[0]);
     }
 
@@ -51,7 +51,7 @@ int main(int argc, char const* const* argv) {
 
     {
         const size_t num_misses = numMisses(arr, size, cache_capacity, cache_algorithm);
-        printf("%zu\n", num_misses);
+        printf("%zu %zu\n", cache_capacity, num_misses);
     }
 
     free(arr);
