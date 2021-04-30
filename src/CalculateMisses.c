@@ -75,7 +75,7 @@ size_t numMisses(uint64_t const* const arr, const size_t len, const size_t cache
         return minNumMisses(arr, len, cache_capacity);
     }
 
-    CachePolicyInt* const cache_policy = cachePolicyIntAlloc(cache_capacity, intHash, intCompare, cache_algorithm);
+    CachePolicyInt* const cache_policy = cachePolicyIntAlloc(cache_capacity, intHash, intCompare, getCacheAlgorithm(cache_algorithm));
     if (!cache_policy) {
         return dummyInt;
     }

@@ -1,5 +1,7 @@
 #include "CalculateMisses.h"
 
+#include <DataStructures/BaseCachePolicy.h>
+
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -30,11 +32,21 @@ static uintptr_t* readArr(FILE* const file, size_t* const size_ptr) {
     return arr;
 }
 
+static void printCacheAlgorithms(FILE* const file) {
+    assert(file);
+
+    fprintf(stderr, "Available algorithms are: ");
+    for (size_t i = 0; i < CACHE_ALGORITHM_INVALID; i++) {
+        fprintf(stderr, "%s, ", cacheAlgorithmNames[i]);
+    }
+    fprintf(stderr, "OPT\n");
+}
+
 int main(int argc, char const* const* argv) {
     if (argc != 3) {
-        fprintf(stderr, "Usage: %s [CachingAlgorithm] [CacheCapacity]\n"
-                        "Available algorithms are: OPT, Dummy\n",
-                argv[0]);
+        fprintf(stderr, "Usage: %s [CachingAlgorithm] [CacheCapacity]\n", argv[0]);
+        printCacheAlgorithms(stderr);
+        return -1;
     }
 
     char const* const cache_algorithm = argv[1];

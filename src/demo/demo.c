@@ -63,7 +63,7 @@ bool stringCompare(char const* const* const left_ptr, char const* const* const r
     return strcmp(*left_ptr, *right_ptr) == 0;
 }
 
-bool visitAll(char const* const* const urls, const size_t num, const size_t cache_capacity, char const* const cache_algorithm) {
+bool visitAll(char const* const* const urls, const size_t num, const size_t cache_capacity, const CacheAlgorithm cache_algorithm) {
     assert(urls && cache_capacity && cache_algorithm);
 
     VectorChar* const vector = vectorCharAlloc();
@@ -215,7 +215,7 @@ int main(int argc, char const* const* const argv) {
     }
 
     const size_t cache_capacity = 128;
-    char const* const cache_algorithm = (argc > 1) ? (argv[1]) : ("");
+    const CacheAlgorithm cache_algorithm = (argc > 1) ? (getCacheAlgorithm(argv[1])) : (CACHE_ALGORITHM_DUMMY);
     visitAll(urls, num_urls, cache_capacity, cache_algorithm);
 
     free(urls);
