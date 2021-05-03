@@ -97,7 +97,7 @@ bool visitAll(char const* const* const urls, const size_t num, const size_t cach
             goto cleanup;
         }
 
-        const size_t buffer_size = vectorCharGetSize(vector);
+        const size_t buffer_size = vectorCharSize(vector);
         if (writeBuffer(urls[i], vectorCharConstData(vector), buffer_size) != buffer_size) {
             goto cleanup;
         }
