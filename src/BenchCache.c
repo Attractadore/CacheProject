@@ -63,7 +63,7 @@ int main(int argc, char const* const* argv) {
 
     {
         const size_t num_misses = numMisses(arr, size, cache_capacity, cache_algorithm);
-        printf("%zu %zu\n", cache_capacity, num_misses);
+        printf("%zu\n", num_misses);
     }
 
     free(arr);
