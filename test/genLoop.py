@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Generate a sequence of increasing sequences
+"""
 import random
 
 def main():

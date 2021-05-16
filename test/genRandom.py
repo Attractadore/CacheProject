@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Generate a sequence whose values are uniformly distributed
+"""
 import random
 
 def main():

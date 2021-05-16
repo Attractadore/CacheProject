@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-import numpy as np
+"""
+Plot benchmark results
+"""
 import matplotlib.pyplot as plt
 from sys import argv
 

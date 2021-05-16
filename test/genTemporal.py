@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Generate a sequence where each item is likely to occur again in the near future
+"""
 import random
 
 def main():
