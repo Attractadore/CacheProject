@@ -3,6 +3,7 @@
 Plot benchmark results
 """
 import matplotlib.pyplot as plt
+import numpy as np
 from sys import argv
 
 def getfrom_file(name):
@@ -14,6 +15,7 @@ def getfrom_file(name):
 def main():
     if len(argv) <= 3 or (len(argv) - 3) % 2 != 0:
         print("Usage: {0} [chart_title] [save_file] [[plot_label] [plot_file]]".format(argv[0]))
+        return
 
     plt.title(argv[1])
     plt.xlabel("Cache size")
