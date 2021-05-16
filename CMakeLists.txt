@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.4)
 project(CacheProject)
 
 include(cmake/CMakeTemplates/CFlags.cmake)
-include(cmake/copy_to_build.cmake)
+include(cmake/CMakeTemplates/AddTestSuite.cmake)
+include(cmake/CMakeTemplates/CopyToBuild.cmake)
 
 add_subdirectory(modules)
 
