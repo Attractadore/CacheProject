@@ -7,7 +7,7 @@ include(cmake/CMakeTemplates/AddTestSuite.cmake)
 include(cmake/CMakeTemplates/CopyToBuild.cmake)
 
 add_subdirectory(modules)
-
+add_subdirectory(test)
 add_subdirectory(src/demo)
 
 add_executable(BenchCache "src/BenchCache.c" "src/CalculateMisses.c")

@@ -1,4 +1,6 @@
-find_package(CURL REQUIRED)
+find_package(CURL)
 
-add_executable(demo "demo.c")
-target_link_libraries(demo DataStructures CURL::libcurl)
+if(CURL_FOUND)
+    add_executable(demo "demo.c")
+    target_link_libraries(demo DataStructures CURL::libcurl)
+endif()
