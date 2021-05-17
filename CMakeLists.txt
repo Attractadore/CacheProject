@@ -12,6 +12,8 @@ add_subdirectory(src/demo)
 
 add_executable(BenchCache "src/BenchCache.c" "src/CalculateMisses.c")
 target_link_libraries(BenchCache DataStructures)
+add_executable(NumHits "src/NumHits.c" "src/CalculateMisses.c")
+target_link_libraries(NumHits DataStructures)
 
 copy_to_build("test/genRandom.py")
 copy_to_build("test/genLoop.py")
