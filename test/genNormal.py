@@ -8,7 +8,7 @@ def main():
     n = int(input())
     print(n)
     for i in range(n):
-        print(max(int(random.gauss(n, n / 4)), 0))
+        print(max(int(random.gauss(n, n / 24)), 0))
 
 if __name__ == "__main__":
     main()
