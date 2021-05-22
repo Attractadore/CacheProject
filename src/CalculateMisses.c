@@ -3,11 +3,11 @@
 #define CACHE_POLICY_TYPE uint64_t
 #define CACHE_POLICY_TYPE_NAME Int
 #include <DataStructures/CachePolicy.h>
-#define OHT_KEY_TYPE uint64_t
-#define OHT_KEY_TYPE_NAME Int
-#define OHT_VALUE_TYPE size_t
-#define OHT_VALUE_TYPE_NAME
-#include <DataStructures/OpenHashTable.h>
+#define CHT_KEY_TYPE uint64_t
+#define CHT_KEY_TYPE_NAME Int
+#define CHT_VALUE_TYPE size_t
+#define CHT_VALUE_TYPE_NAME
+#include <DataStructures/ChainHashTable.h>
 
 typedef struct {
   uint64_t value;
@@ -53,29 +53,29 @@ int valueIndexPairCompare(ValueIndexPair const *const left,
 static size_t *getForwardIndices(uint64_t const *const arr, const size_t len) {
   assert(arr);
 
-  OHTInt *const prev_indices = ohtIntAlloc(intHash, intCompare);
+  CHTInt *const prev_indices = chtIntAlloc(intHash, intCompare);
   if (!prev_indices) {
     return NULL;
   }
 
   size_t *const forward_indices = calloc(len, sizeof(*forward_indices));
   if (!forward_indices) {
-    ohtIntFree(prev_indices);
+    chtIntFree(prev_indices);
     return NULL;
   }
 
   for (size_t i = len - 1; i < len; i--) {
-    uint64_t *const ptr = ohtIntFind(prev_indices, arr[i]);
+    uint64_t *const ptr = chtIntFind(prev_indices, arr[i]);
     const size_t prev_index = (ptr) ? (*ptr) : (SIZE_MAX);
     forward_indices[i] = prev_index;
-    if (!ohtIntInsert(prev_indices, arr[i], i)) {
-      ohtIntFree(prev_indices);
+    if (!chtIntInsert(prev_indices, arr[i], i)) {
+      chtIntFree(prev_indices);
       free(forward_indices);
       return NULL;
     }
   }
 
-  ohtIntFree(prev_indices);
+  chtIntFree(prev_indices);
 
   return forward_indices;
 }
@@ -84,11 +84,11 @@ static size_t minNumMisses(uint64_t const *const arr, const size_t len,
                            const size_t cache_capacity) {
   assert(arr && cache_capacity);
 
-  OHTInt *const cache = ohtIntAlloc(intHash, intCompare);
+  CHTInt *const cache = chtIntAlloc(intHash, intCompare);
   BinHeap *const queue = binHeapAlloc(valueIndexPairCompare);
   size_t *const forward_indices = getForwardIndices(arr, len);
   if (!cache || !queue || !forward_indices) {
-    ohtIntFree(cache);
+    chtIntFree(cache);
     binHeapFree(queue);
     free(forward_indices);
 
@@ -97,15 +97,15 @@ static size_t minNumMisses(uint64_t const *const arr, const size_t len,
 
   size_t num_misses = 0;
   for (size_t i = 0; i < len; i++) {
-    if (!ohtIntFind(cache, arr[i])) {
+    if (!chtIntFind(cache, arr[i])) {
       num_misses++;
-      if (ohtIntSize(cache) == cache_capacity) {
+      if (chtIntSize(cache) == cache_capacity) {
         const uint64_t max = binHeapPop(queue).value;
-        ohtIntDelete(cache, max);
+        chtIntDelete(cache, max);
       }
-      assert(ohtIntSize(cache) < cache_capacity);
+      assert(chtIntSize(cache) < cache_capacity);
 
-      if (!ohtIntInsert(cache, arr[i], 0)) {
+      if (!chtIntInsert(cache, arr[i], 0)) {
         num_misses = SIZE_MAX;
         break;
       }
@@ -118,7 +118,7 @@ static size_t minNumMisses(uint64_t const *const arr, const size_t len,
     }
   }
 
-  ohtIntFree(cache);
+  chtIntFree(cache);
   binHeapFree(queue);
   free(forward_indices);
 
